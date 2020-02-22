@@ -17,7 +17,13 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "keratin-authn-client": [
+        "dist/keratin-authn-client/keratin-authn-client",
+        "dist/keratin-authn-client"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
