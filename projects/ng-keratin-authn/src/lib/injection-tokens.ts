@@ -1,8 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { TokenStorageService } from './models';
 
-export const HOSTNAME = new InjectionToken<string>('hostname');
-export const TOKEN_STORE = new InjectionToken<TokenStorageService>(
-  'tokenStoreService'
+export const KERATIN_BASE_URL = new InjectionToken<string>('keratin.base.url');
+export const KERATIN_TOKEN_STORE = new InjectionToken<TokenStorageService>(
+  'keratin.token.storage.strategy'
 );
-export const COOKIE_NAME = new InjectionToken<string>('cookieName');

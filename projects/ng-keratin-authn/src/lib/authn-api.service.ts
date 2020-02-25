@@ -3,7 +3,7 @@ import { Injectable, InjectionToken, Inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Credentials, Token, PasswordScore } from './models';
-import { HOSTNAME } from './injection-tokens';
+import { KERATIN_BASE_URL } from './injection-tokens';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,7 @@ import { HOSTNAME } from './injection-tokens';
 export class AuthnApiService {
   constructor(
     private http: HttpClient,
-    @Inject(HOSTNAME) private baseUrl: string
+    @Inject(KERATIN_BASE_URL) private baseUrl: string
   ) {}
 
   changePassword(args: {

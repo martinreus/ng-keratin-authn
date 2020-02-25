@@ -1,18 +1,13 @@
-import { TokenStorageService, Token } from './models';
-import { Inject, Injectable } from '@angular/core';
-import { CookieService } from 'ngx-cookie-service';
+import { Injectable } from '@angular/core';
 import { JwtTokenParserService } from './jwt-token-parser.service';
-import { COOKIE_NAME } from './injection-tokens';
+import { Token, TokenStorageService } from './models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CookieStorageService implements TokenStorageService {
-  constructor(
-    private cookieService: CookieService,
-    private jwtParser: JwtTokenParserService,
-    @Inject(COOKIE_NAME) private cookieName: string
-  ) {}
+  private cookieName = 'authnIdToken';
+  constructor(private jwtParser: JwtTokenParserService) {}
 
   /**
    * Stores the id token received from Keratin Authn in a Cookie
@@ -20,24 +15,42 @@ export class CookieStorageService implements TokenStorageService {
    */
   store(token: Token) {
     const jwtClaims = this.jwtParser.fromIdToken(token.id_token);
-    this.cookieService.set(
-      this.cookieName,
-      token.id_token,
-      new Date(jwtClaims.exp)
-    );
+
+    this.setCookie(token.id_token, new Date(jwtClaims.exp));
   }
 
   retrieve(): Token | null {
-    const idToken = this.cookieService.get(this.cookieName);
+    const idToken = this.getCookie();
 
     return idToken ? { id_token: idToken } : null;
   }
 
   delete() {
-    this.cookieService.set(
-      this.cookieName,
-      '',
-      new Date('Thu, 01 Jan 1970 00:00:01 GMT')
+    this.setCookie('', new Date('Thu, 01 Jan 1970 00:00:01 GMT'));
+  }
+
+  private setCookie(cookieValue: string, expires: Date): void {
+    document.cookie = `${
+      this.cookieName
+    }=${cookieValue};expires=${expires.toUTCString()};`;
+  }
+
+  private getCookie(): string {
+    const regExp: RegExp = this.getCookieRegExp(this.cookieName);
+    const result: RegExpExecArray | null = regExp.exec(document.cookie);
+
+    return result ? result[1] : '';
+  }
+
+  private getCookieRegExp(name: string): RegExp {
+    const escapedName: string = name.replace(
+      /([\[\]\{\}\(\)\|\=\;\+\?\,\.\*\^\$])/gi,
+      '\\$1'
+    );
+
+    return new RegExp(
+      '(?:^' + escapedName + '|;\\s*' + escapedName + ')=(.*?)(?:;|$)',
+      'g'
     );
   }
 }
