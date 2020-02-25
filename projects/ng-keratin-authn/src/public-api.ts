@@ -4,4 +4,5 @@
 
 export * from './lib/authn-session.service';
 export * from './lib/authn-api.service';
+export * from './lib/models';
 export * from './lib/keratin-authn-client.module';
