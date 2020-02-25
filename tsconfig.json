@@ -18,10 +18,11 @@
       "es2018",
       "dom"
     ],
+    "strictNullChecks": true,
     "paths": {
-      "keratin-authn-client": [
-        "dist/keratin-authn-client/keratin-authn-client",
-        "dist/keratin-authn-client"
+      "ng-keratin-authn": [
+        "dist/ng-keratin-authn/ng-keratin-authn",
+        "dist/ng-keratin-authn"
       ]
     }
   },

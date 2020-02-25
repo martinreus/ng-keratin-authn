@@ -1,20 +1,21 @@
-import { IdTokenStorageService, Token } from './models';
-import { Inject } from '@angular/core';
+import { TokenStorageService, Token } from './models';
+import { Inject, Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { JwtTokenParserService } from './jwt-token-parser.service';
+import { COOKIE_NAME } from './injection-tokens';
 
-@Inject({
+@Injectable({
   providedIn: 'root'
 })
-export class CookieStorageService implements IdTokenStorageService {
+export class CookieStorageService implements TokenStorageService {
   constructor(
     private cookieService: CookieService,
     private jwtParser: JwtTokenParserService,
-    private cookieName: string = 'idToken'
+    @Inject(COOKIE_NAME) private cookieName: string
   ) {}
 
   /**
-   * Securely stores the id token received from Keratin Authn in a secure Cookie
+   * Stores the id token received from Keratin Authn in a Cookie
    * which will be sent on every request made to the backend.
    */
   store(token: Token) {
@@ -26,10 +27,10 @@ export class CookieStorageService implements IdTokenStorageService {
     );
   }
 
-  retrieve(): Token {
-    // tslint:disable-next-line: variable-name
-    const id_token = this.cookieService.get(this.cookieName);
-    return { id_token };
+  retrieve(): Token | null {
+    const idToken = this.cookieService.get(this.cookieName);
+
+    return idToken ? { id_token: idToken } : null;
   }
 
   delete() {

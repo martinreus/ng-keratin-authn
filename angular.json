@@ -3,38 +3,38 @@
   "version": 1, 
   "newProjectRoot": "projects",
   "projects": {
-    "keratin-authn-client": {
+    "ng-keratin-authn": {
       "projectType": "library",
-      "root": "projects/keratin-authn-client",
-      "sourceRoot": "projects/keratin-authn-client/src",
+      "root": "projects/ng-keratin-authn",
+      "sourceRoot": "projects/ng-keratin-authn/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "tsConfig": "projects/keratin-authn-client/tsconfig.lib.json",
-            "project": "projects/keratin-authn-client/ng-package.json"
+            "tsConfig": "projects/ng-keratin-authn/tsconfig.lib.json",
+            "project": "projects/ng-keratin-authn/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/keratin-authn-client/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ng-keratin-authn/tsconfig.lib.prod.json"
             }
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/keratin-authn-client/src/test.ts",
-            "tsConfig": "projects/keratin-authn-client/tsconfig.spec.json",
-            "karmaConfig": "projects/keratin-authn-client/karma.conf.js"
+            "main": "projects/ng-keratin-authn/src/test.ts",
+            "tsConfig": "projects/ng-keratin-authn/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-keratin-authn/karma.conf.js"
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "projects/keratin-authn-client/tsconfig.lib.json",
-              "projects/keratin-authn-client/tsconfig.spec.json"
+              "projects/ng-keratin-authn/tsconfig.lib.json",
+              "projects/ng-keratin-authn/tsconfig.spec.json"
             ],
             "exclude": [
               "**/node_modules/**"
@@ -43,5 +43,5 @@
         }
       }
     }},
-  "defaultProject": "keratin-authn-client"
+  "defaultProject": "ng-keratin-authn"
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../../dist/keratin-authn-client",
+  "dest": "../../dist/ng-keratin-authn",
   "lib": {
     "entryFile": "src/public-api.ts"
   }

@@ -2,15 +2,20 @@ export interface Token {
   id_token: string;
 }
 
+export interface PasswordScore {
+  score: number;
+  requiredScore: number;
+}
+
 export interface Credentials {
   [index: string]: string;
   username: string;
   password: string;
 }
 
-export interface IdTokenStorageService {
+export interface TokenStorageService {
   store(token: Token);
-  retrieve(): Token;
+  retrieve(): Token | null;
   delete();
 }
 

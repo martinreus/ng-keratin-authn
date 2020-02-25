@@ -1,14 +1,18 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken, Inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Credentials, Token } from './models';
+import { Credentials, Token, PasswordScore } from './models';
+import { HOSTNAME } from './injection-tokens';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ApiService {
-  constructor(private http: HttpClient, private baseUrl: string) {}
+export class AuthnApiService {
+  constructor(
+    private http: HttpClient,
+    @Inject(HOSTNAME) private baseUrl: string
+  ) {}
 
   changePassword(args: {
     password: string;
@@ -17,6 +21,12 @@ export class ApiService {
     return this.http
       .post(`${this.baseUrl}/password`, args)
       .pipe(map(toTokenResponse));
+  }
+
+  score(args: { password: string }): Observable<PasswordScore> {
+    return this.http
+      .post(`${this.baseUrl}/password/score`, args)
+      .pipe(map(result => (result as any).result as PasswordScore));
   }
 
   isAvailable(username: string): Observable<boolean> {

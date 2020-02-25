@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { KeratinAuthnService } from './keratin-authn.service';
+import { AuthnApiService } from './authn-api.service';
 
-describe('KeratinAuthnService', () => {
-  let service: KeratinAuthnService;
+describe('AuthnApiService', () => {
+  let service: AuthnApiService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(KeratinAuthnService);
+    service = TestBed.inject(AuthnApiService);
   });
 
   it('should be created', () => {
