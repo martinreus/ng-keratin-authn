@@ -10,29 +10,29 @@ interface AdditionalOptions {
 
 @NgModule()
 export class KeratinAuthnModule {
-  static forRoot = (
+  static forRoot(
     authBaseUrl: string,
     storageMode: storageTypes = 'cookie',
     options?: AdditionalOptions
-  ): ModuleWithProviders<KeratinAuthnModule> => {
-    // const tokenStorageStrategy = KeratinAuthnModule.toStorageClass(storageMode);
+  ): ModuleWithProviders<KeratinAuthnModule> {
+    const tokenStorageStrategy = KeratinAuthnModule.toStorageClass(storageMode);
 
     return {
       ngModule: KeratinAuthnModule,
       providers: [
         // { provide: COOKIE_NAME, useValue: options?.cookieName || 'idToken' },
         { provide: KERATIN_BASE_URL, useValue: authBaseUrl },
-        { provide: KERATIN_TOKEN_STORE, useClass: CookieStorageService }
+        { provide: KERATIN_TOKEN_STORE, useClass: tokenStorageStrategy }
       ]
     };
-  };
+  }
 
-  // private static toStorageClass(storageMode: storageTypes) {
-  //   switch (storageMode) {
-  //     case 'cookie':
-  //       return CookieStorageService;
-  //     default:
-  //       throw new Error(`Storage mode '${storageMode}' is not yet supported.`);
-  //   }
-  // }
+  private static toStorageClass(storageMode: storageTypes) {
+    switch (storageMode) {
+      case 'cookie':
+        return CookieStorageService;
+      default:
+        throw new Error(`Storage mode '${storageMode}' is not yet supported.`);
+    }
+  }
 }
