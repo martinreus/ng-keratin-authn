@@ -12,8 +12,8 @@ import {
 } from 'rxjs/operators';
 import { AuthnApiService } from './authn-api.service';
 import { JwtTokenParserService } from './jwt-token-parser.service';
-import { Credentials, TokenStorageService, JWTClaims, Token } from './models';
-import { KERATIN_TOKEN_STORE } from './injection-tokens';
+import { Credentials, IdTokenStorageService, JWTClaims, Token } from './models';
+import { KERATIN_ID_TOKEN_STORE } from './injection-tokens';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,8 @@ export class AuthnSessionService {
 
   constructor(
     private api: AuthnApiService,
-    @Inject(KERATIN_TOKEN_STORE) private idTokenStorage: TokenStorageService,
+    @Inject(KERATIN_ID_TOKEN_STORE)
+    private idTokenStorage: IdTokenStorageService,
     private tokenParser: JwtTokenParserService
   ) {
     this.trySettingInitialAuthentication();
