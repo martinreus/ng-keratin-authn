@@ -1,27 +1,110 @@
 # NgKeratinAuthn
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.1.
+Library to easily integrate your Angular App with Keratin authn.
+This library allows you to easily log in / log out, subscribe users, etc.
 
-## Development server
+It can be used both for the client side and also if using Server Side rendering.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## WARNING: This library is still in development, don't expect it to work.
 
-## Code scaffolding
+If you want to help, please do so as I don't have much spare time to dedicate to this side project :)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Open tasks:
+- Tests!
+- Cleanup of commented code, TODOS all over
+- Fix SSR part, still not 100% working
+- bubble back refresh token with the help of the ssr-session.interceptor to the response object from the originating ssr client call, so that the refreshed session
+can be used by the browser in subsequent calls.
 
-## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## Using NPM Link to develop
 
-## Running unit tests
+When developing this library and npm linking into an angular app for testing, remember to:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- you call `npm link` under the dist/ng-keratin-authn folder
+- you call `npm link ng-keratin-authn` from your angular project, to use this library
+- In you angular application, add `"preserveSymlinks": true` in these locations:
+```
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "preserveSymlinks": true,   <= here..
 
-## Running end-to-end tests
+      [...]
+      
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "preserveSymlinks": true,  <= here..
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+      [...]
 
-## Further help
+        "serve-ssr": {
+          "builder": "@nguniversal/builders:ssr-dev-server",
+          "options": {
+            "preserveSymlinks": true,  <= and here
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```
+otherwise you'll get an `Error: inject() must be called from an injection context` error when accessing the app through SSR.
+
+## How to use this lib
+
+#### Client side
+In `app.client.module`:
+
+```typescript
+@NgModule({
+  imports: [
+      AppModule, 
+      // The url points to keratin authn server. 
+      // Can be a subroute if you are using a reverse proxy,
+      // or also a full URL such as `https://authn.example.com`
+      KeratinAuthnModule.forRoot('api/auth')
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppClientModule {}
+
+```
+
+#### Server side
+
+If you are using Server side rendering, include this in your server module:
+```typescript
+@NgModule({
+  imports: [
+    AppModule,
+    ServerModule,
+    ServerTransferStateModule,
+    // URL here must have the schema, since it will be called from within
+    // SSR context. 
+    KeratinAuthnModule.forServerRoot('http://authn.address')
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppServerModule {}
+
+```
+
+You will also need to add a provider for the `request` and `response` objects from server.ts, like so:
+
+```typescript
+[...]
+
+  // All regular routes use the Universal engine
+  server.get('*', (req, res) => {
+    res.render(indexHtml, {
+      req,
+      providers: [
+        // add this line here; we will need req object to extract cookie information
+        // and response to bubble up the refreshed session token received from
+        // keratin
+        keratinReqResSSRProvider(req, res)
+      ]
+    });
+  });
+
+[...]
+```
+

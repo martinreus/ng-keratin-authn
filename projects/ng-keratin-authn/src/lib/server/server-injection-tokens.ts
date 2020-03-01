@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { Response } from './models';
+import { Response } from '../models';
 
 export const KERATIN_REFRESH_TOKEN_COOKIE_NAME = new InjectionToken<string>(
   'keratin.session.token.name'

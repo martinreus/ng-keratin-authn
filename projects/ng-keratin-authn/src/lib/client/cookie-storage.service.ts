@@ -2,20 +2,20 @@ import { Injectable, Inject } from '@angular/core';
 import { JwtTokenParserService } from '../jwt-token-parser.service';
 import { CookiesService } from '../cookies.service';
 import { Token, IdTokenStorageService } from '../models';
-import { KERATIN_ID_TOKEN_COOKIE_NAME } from '../injection-tokens';
+import { KERATIN_ID_TOKEN_STORE_KEY } from '../injection-tokens';
 
 /**
  * Client side Token Storage service for storing an id_token in a cookie.
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class CookieStorageService implements IdTokenStorageService {
   constructor(
     private jwtParser: JwtTokenParserService,
     private cookies: CookiesService,
-    @Inject(KERATIN_ID_TOKEN_COOKIE_NAME) private cookieName: string
-  ) {}
+    @Inject(KERATIN_ID_TOKEN_STORE_KEY) private cookieName: string
+  ) {
+    console.log('using cookie storage');
+  }
 
   /**
    * Stores the id token received from Keratin Authn in a Cookie
@@ -24,7 +24,7 @@ export class CookieStorageService implements IdTokenStorageService {
   store(token: Token) {
     const jwtClaims = this.jwtParser.fromIdToken(token.id_token);
 
-    document.cookie = this.cookies.buildCookie(
+    document.cookie = this.cookies.serialize(
       this.cookieName,
       token.id_token,
       new Date(jwtClaims.exp)
@@ -38,7 +38,7 @@ export class CookieStorageService implements IdTokenStorageService {
   }
 
   delete() {
-    document.cookie = this.cookies.buildCookie(
+    document.cookie = this.cookies.serialize(
       this.cookieName,
       '',
       new Date('Thu, 01 Jan 1970 00:00:01 GMT')

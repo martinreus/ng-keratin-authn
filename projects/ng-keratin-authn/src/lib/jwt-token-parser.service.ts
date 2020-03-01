@@ -5,7 +5,9 @@ import { JWTClaims } from './models';
   providedIn: 'root'
 })
 export class JwtTokenParserService {
-  constructor() {}
+  constructor() {
+    console.log('started jwt parser');
+  }
 
   fromIdToken(idToken: string): JWTClaims {
     try {

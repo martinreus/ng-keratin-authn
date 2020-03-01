@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /**
  * Reads to/from a cookie
@@ -7,9 +7,11 @@ import { Injectable, Inject } from '@angular/core';
   providedIn: 'root'
 })
 export class CookiesService {
-  constructor() {}
+  constructor() {
+    console.log('started cookies service');
+  }
 
-  buildCookie(cookieName: string, cookieValue: string, expires: Date): string {
+  serialize(cookieName: string, cookieValue: string, expires: Date): string {
     return `${cookieName}=${cookieValue};expires=${expires.toUTCString()};`;
   }
 

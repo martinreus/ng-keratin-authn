@@ -1,3 +1,4 @@
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
   ClassSansProvider,
   ExistingSansProvider,
@@ -5,18 +6,19 @@ import {
   ModuleWithProviders,
   NgModule,
   Provider,
-  Type,
   ValueSansProvider
 } from '@angular/core';
+import { AuthorizationInterceptorService } from './client/authorization-interceptor.service';
 import { CookieStorageService } from './client/cookie-storage.service';
+import { LocalStorageService } from './client/local-storage.service';
 import {
   KERATIN_BASE_URL,
   KERATIN_ID_TOKEN_STORE,
-  KERATIN_ID_TOKEN_COOKIE_NAME
+  KERATIN_ID_TOKEN_STORE_KEY
 } from './injection-tokens';
-import { IdTokenStorageService } from './models';
-import { SSRRequestCookieIdTokenStorage } from './server/ssr-request-cookie-id-token-storage.service';
-import { KERATIN_REFRESH_TOKEN_COOKIE_NAME } from './server-injection-tokens';
+import { KERATIN_REFRESH_TOKEN_COOKIE_NAME } from './server/server-injection-tokens';
+import { SsrSessionInterceptor } from './server/ssr-session.interceptor';
+import { InMemoryIdTokenStorage } from './server/ssr-in-memory-id-token-storage.service';
 
 type ProviderSansProvider =
   | FactorySansProvider
@@ -25,15 +27,11 @@ type ProviderSansProvider =
   | ExistingSansProvider;
 
 type ClientStorageStrategy = 'cookie' | 'localStorage';
-type ServerStorageStrategy = 'request-cookie' | 'authorization-header';
 
 const defaultIdTokenName = 'authnIdToken';
 
 export interface ClientOptions {
   tokenStore: ClientStorageStrategy | ProviderSansProvider;
-}
-export interface ServerOptions {
-  tokenStore: ServerStorageStrategy | ProviderSansProvider;
 }
 
 @NgModule()
@@ -66,6 +64,12 @@ export class KeratinAuthnModule {
       ngModule: KeratinAuthnModule,
       providers: [
         { provide: KERATIN_BASE_URL, useValue: authBaseUrl },
+        { provide: KERATIN_ID_TOKEN_STORE_KEY, useValue: defaultIdTokenName },
+        {
+          provide: HTTP_INTERCEPTORS,
+          useClass: AuthorizationInterceptorService,
+          multi: true
+        },
         tokenStoreProvider
       ]
     };
@@ -78,37 +82,40 @@ export class KeratinAuthnModule {
    * the server side can render the application if user is authenticated or has an expired id_token but still
    * valid session token.
    *
-   * @param authBaseUrl Base URL where calls will be made to the auth server, for example 'api/auth'
-   *                    or 'http://authn-server'
+   * @param authBaseUrl Base URL where calls will be made to the auth server, for example 'http://authn-server'
    * @param options Additional options, such as where authn token will be stored; default will be a cookie store.
    *                You can also provide your own authn id_token storage implementation
    */
   static forServerRoot(
-    authBaseUrl: string,
-    options: ServerOptions = { tokenStore: 'request-cookie' }
+    authBaseUrl: string
+    // options: ServerOptions = { tokenStore: 'request-cookie' }
   ): ModuleWithProviders<KeratinAuthnModule> {
-    let tokenStoreProvider: Provider = [];
+    // let tokenStoreProvider: Provider = [];
 
-    if (typeof options.tokenStore === 'string') {
-      tokenStoreProvider = KeratinAuthnModule.serverStorageProviders(
-        options.tokenStore
-      );
-    } else {
-      tokenStoreProvider = {
-        provide: KERATIN_ID_TOKEN_STORE,
-        ...options.tokenStore
-      };
-    }
+    // if (typeof options.tokenStore === 'string') {
+    //   tokenStoreProvider = KeratinAuthnModule.serverStorageProviders(
+    //     options.tokenStore
+    //   );
+    // } else {
+    //   tokenStoreProvider = {
+    //     provide: KERATIN_ID_TOKEN_STORE,
+    //     ...options.tokenStore
+    //   };
+    // }
 
     return {
       ngModule: KeratinAuthnModule,
       providers: [
         { provide: KERATIN_BASE_URL, useValue: authBaseUrl },
+        { provide: KERATIN_REFRESH_TOKEN_COOKIE_NAME, useValue: 'authn' },
+        { provide: KERATIN_ID_TOKEN_STORE, useClass: InMemoryIdTokenStorage },
+        // { provide: KERATIN_ID_TOKEN_STORE_KEY, useValue: defaultIdTokenName },
         {
-          provide: KERATIN_REFRESH_TOKEN_COOKIE_NAME,
-          useValue: 'authn'
-        },
-        tokenStoreProvider
+          provide: HTTP_INTERCEPTORS,
+          useClass: SsrSessionInterceptor,
+          multi: true
+        }
+        // tokenStoreProvider
       ]
     };
   }
@@ -121,14 +128,12 @@ export class KeratinAuthnModule {
   ): Provider[] {
     switch (storage) {
       case 'localStorage':
-        throw new Error(`Storage type '${storage}' not supported yet.`);
+        return [
+          { provide: KERATIN_ID_TOKEN_STORE, useClass: LocalStorageService }
+        ];
       case 'cookie':
       default:
         return [
-          {
-            provide: KERATIN_ID_TOKEN_COOKIE_NAME,
-            useValue: defaultIdTokenName
-          },
           { provide: KERATIN_ID_TOKEN_STORE, useClass: CookieStorageService }
         ];
     }
@@ -137,25 +142,20 @@ export class KeratinAuthnModule {
   /**
    * Returns needed Providers depending on which type of StorageStrategy was chosen.
    */
-  private static serverStorageProviders(
-    storage?: ServerStorageStrategy
-  ): Provider[] {
-    switch (storage) {
-      case 'authorization-header':
-        throw new Error(`Storage type '${storage}' not supported yet.`);
-      case 'request-cookie':
-      default:
-        return [
-          {
-            // TODO: make configurable
-            provide: KERATIN_ID_TOKEN_COOKIE_NAME,
-            useValue: defaultIdTokenName
-          },
-          {
-            provide: KERATIN_ID_TOKEN_STORE,
-            useClass: SSRRequestCookieIdTokenStorage
-          }
-        ];
-    }
-  }
+  // private static serverStorageProviders(
+  //   storage?: ServerStorageStrategy
+  // ): Provider[] {
+  //   switch (storage) {
+  //     case 'authorization-header':
+  //       throw new Error(`Storage type '${storage}' not supported yet.`);
+  //     case 'request-cookie':
+  //     default:
+  //       return [
+  //         {
+  //           provide: KERATIN_ID_TOKEN_STORE,
+  //           useClass: SSRRequestCookieIdTokenStorage
+  //         }
+  //       ];
+  //   }
+  // }
 }
